@@ -1,13 +1,14 @@
 package main;
 
 import graph_model.GraphMatrix;
-import is_clique.IsClique;
+// import is_clique.IsClique;
+import max_clique.MaxClique;
+import max_clique.Node;
 
 public class Main {
 
 	public static void main(String[] args) {
 		GraphMatrix g = new GraphMatrix();
-		GraphMatrix gC = new GraphMatrix();
 		int n = 6;
 		boolean m [][] = {
 				{true, true, false, false, true, false},
@@ -18,31 +19,33 @@ public class Main {
 				{false, false, false, true, false, true}
 		};
 
-		int nC = 3;
-		boolean mC [][] = {
-				{true, true, true},
-				{true, true, true},
-				{true, true, true},
-		};
 
+		// boolean [] v = {true, true, false, false, true, false};
 		
 
 		g.setGraph(m, n);
-		gC.setGraph(mC, nC);
 
-		System.out.println("g");
+	    /* System.out.println("g");
 		if(IsClique.isClique(g)) {
 			System.out.println("Es cliqué");
 		} else {
 			System.out.println("No es cliqué");
 		}
 
-		System.out.println("\ngC");
-		if(IsClique.isClique(gC)) {
+		System.out.println("\ng'");
+		if(IsClique.isClique(g, v)) {
 			System.out.println("Es cliqué");
 		} else {
 			System.out.println("No es cliqué");
+		} */
+
+		Node res = MaxClique.getMaxClique(g);
+
+		System.out.print("\nMejor clique de g: " + res.getK() + " - v: {");
+		for(boolean v : res.getVertices()) {
+			System.out.print(v + " ");
 		}
+		System.out.print("}\n");
 	}
 
 }

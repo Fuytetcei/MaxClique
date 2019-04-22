@@ -17,4 +17,20 @@ public class IsClique {
 
 		return res;
 	}
+
+	public static boolean isClique(GraphMatrix g, boolean [] v) {
+		boolean res = true;
+
+		for(int i = 0; i<g.getSize() && res; i++) {
+			if(v[i]) {
+				for(int j = 0; j<g.getSize() && res; j++) {
+					if(v[j] && !g.getLink(i, j)) {
+						res = false;
+					}
+				}
+			}
+		}
+
+		return res;
+	}
 }
