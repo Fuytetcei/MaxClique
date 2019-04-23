@@ -1,6 +1,6 @@
 package max_clique;
 
-import java.util.Stack;
+import java.util.PriorityQueue;
 
 import graph_model.GraphMatrix;
 import is_clique.IsClique;
@@ -9,7 +9,8 @@ public class MaxClique {
 
 	public static Node getMaxClique(GraphMatrix g) {
 		Node res = null;
-		Stack<Node> s = new Stack<Node>();
+		// Stack<Node> s = new Stack<Node>();
+		PriorityQueue<Node> s = new PriorityQueue<Node>(1024, new NodeComparator());
 		int kMax = 0;
 		boolean [] vertices = new boolean [g.getSize()];
 		for(int i = 0; i < g.getSize();i++) {
@@ -26,22 +27,30 @@ public class MaxClique {
 		Node next = null;
 		boolean [] v = null;
 		int indice;
-		while(!s.isEmpty() && (costeEstimado(s.peek(), kMax) > kMax)) {
-			curr = s.pop();
-			System.out.println("curr - k: " + curr.getK() + " - i: " + curr.getIndice());
+		System.out.println(" *******************");
+		while(!s.isEmpty() /*&& (costeEstimado(s.peek(), kMax) > kMax)*/) {
+			curr = s.poll();
+			System.out.println("KMax: " + kMax + " curr - k: " + curr.getK() + " - i: " + curr.getIndice());
 
 			if((curr.getIndice() + 1) < curr.getG().getSize()) {
 				// Cojo el vértice i
 				indice = curr.getIndice()+1;
 				v = curr.getVertices().clone();
 				v[indice] = true;
-				next = new Node(g, v, indice, kMax + 1);
+				next = new Node(g, v, indice, curr.getK() + 1);
+				System.out.print("\n\tCojo {");
+				for(boolean ver : v) {
+					System.out.print(ver + " ");
+				}
+				System.out.print("}\n");
 				if(esSolucion(next)) {
 					if(costeReal(next) > kMax) {
+						System.out.println("\t\t--- NUEVA SOLUCION ---");
 						res = next;
 					}
 				} else {
 					if(esCompletable(next, kMax) && costeEstimado(next, kMax) > kMax) {
+						System.out.println("\tAñado cogiendo");
 						s.add(next);
 					}
 				}
@@ -49,11 +58,20 @@ public class MaxClique {
 				// Solo compruebo si es factible ya que es igual que el padre pero con un nodo disponible menos
 				indice = curr.getIndice() + 1;
 				v = curr.getVertices().clone();
-				next = new Node(g, v, indice, kMax + 1);
+				next = new Node(g, v, indice, kMax);
+				System.out.print("\n\tNo cojo {");
+				for(boolean ver : v) {
+					System.out.print(ver + " ");
+				}
+				System.out.print("}\n");
 				if(esCompletable(next, kMax)) {
+					System.out.println("\tAñado sin coger");
 					s.add(next);
 				}
+			} else {
+				// TODO: comprobar si es solución
 			}
+			System.out.println(" *******************");
 		}
 
 		return res;
@@ -67,7 +85,7 @@ public class MaxClique {
 		// Ingénua: todos los vértices restantes forman un clique
 		System.out.println("\tcoste estimado: " + (next.getK() + (next.getG().getSize() - (next.getIndice() + 1))));
 		return (next.getK() + (next.getG().getSize() - (next.getIndice() + 1)));
-		// Ajustada: Al menos hay un clique de tamaño kMax para los siguientes nodos restantes
+		// Ajustada: Al menos hay un clique de tamaño (kMax + 1) para los siguientes nodos restantes
 		/*int res;
 		Node estimado = null;
 		int indice = next.getIndice() + (kMax - next.getK());
@@ -96,6 +114,8 @@ public class MaxClique {
 		System.out.println("\tEs completable: " + ((next.getK() + (next.getG().getSize() - (next.getIndice() + 1))) >= kMax));
 		return (next.getK() + (next.getG().getSize() - (next.getIndice() + 1))) >= kMax;
 	}
+
+	
 }
 
 /*

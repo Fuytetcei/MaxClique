@@ -9,7 +9,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		GraphMatrix g = new GraphMatrix();
-		int n = 6;
+		/*int n = 6;
 		boolean m [][] = {
 				{true, true, false, false, true, false},
 				{true, true, true, false, true, false},
@@ -17,6 +17,13 @@ public class Main {
 				{false, false, true, true, true, true},
 				{true, true, false, true, true, false},
 				{false, false, false, true, false, true}
+		};*/
+
+		int n = 3;
+		boolean m [][] = {
+				{true, true, false},
+				{true, true, false},
+				{false, false, true}
 		};
 
 
