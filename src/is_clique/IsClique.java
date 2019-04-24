@@ -23,9 +23,9 @@ public class IsClique {
 
 		for(int i = 0; i<g.getSize() && res; i++) {
 			if(v[i]) {
-				for(int j = 0; j<g.getSize() && res; j++) {
+				for(int j = 0; j < i && res; j++) {
 					if(v[j] && !g.getLink(i, j)) {
-						res = false;
+							res = false;
 					}
 				}
 			}
