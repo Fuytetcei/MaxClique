@@ -9,7 +9,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		GraphMatrix g = new GraphMatrix();
-		int n = 6;
+		/*int n = 6;
 		boolean m [][] = {
 				{true, true, false, false, true, false},
 				{true, true, true, false, true, false},
@@ -17,7 +17,7 @@ public class Main {
 				{false, false, true, true, true, true},
 				{true, true, false, true, true, false},
 				{false, false, false, true, false, true}
-		};
+		};*/
 
 		/*int n = 3;
 		boolean m [][] = {
@@ -26,28 +26,40 @@ public class Main {
 				{false, false, true}
 		};*/
 
-		// boolean [] q = {true, true, false};
+		/*int n = 10;
+		boolean m [][] = {
+				{true, true, true, true, true, true, true, false, false, false},
+				{true, true, true, true, true, true, true, false, false, false},
+				{true, true, true, true, true, true, true, false, false, false},
+				{true, true, true, true, true, true, true, false, false, false},
+				{true, true, true, true, true, true, true, false, false, false},
+				{true, true, true, true, true, true, true, false, false, false},
+				{true, true, true, true, true, true, true, false, false, false},
+				{false, false, false, false, false, false, false, false, false, false},
+				{false, false, false, false, false, false, false, false, false, false},
+				{false, false, false, false, false, false, false, false, false, false}
+		};*/
 
-		g.setGraph(m, n);
+		// g.setGraph(m, n);
 
-		// System.out.println("Es clique: " + IsClique.isClique(g, q));
+		g = GeneraGrafo.generaGrafoAleatorioClique(10, 5);
+		// Coste optimista
+		Node resOp = MaxClique.getMaxClique(g, false);
+		// Coste pesimista
+		//Node resPe = MaxClique.getMaxClique(g, false);
 
-		/*Node res = MaxClique.getMaxClique(g);
-
-		System.out.print("\nMejor clique de g: " + res.getK() + " - v: {");
-		for(boolean v : res.getVertices()) {
-			System.out.print(v + " ");
-		}
-		System.out.print("}\n");*/
-
-		g = GeneraGrafo.generaGrafoAleatorioClique(50, 20);
-		Node res = MaxClique.getMaxClique(g);
-
-		System.out.print("\nMejor clique de g: " + res.getK() + " - v: {");
-		for(boolean v : res.getVertices()) {
+		System.out.println("Coste optimista");
+		System.out.print("\nMejor clique de g: " + resOp.getK() + " - v: {");
+		for(boolean v : resOp.getVertices()) {
 			System.out.print(v + " ");
 		}
 		System.out.print("}\n");
+		/*System.out.println("Coste pesimista");
+		System.out.print("\nMejor clique de g: " + resPe.getK() + " - v: {");
+		for(boolean v : resPe.getVertices()) {
+			System.out.print(v + " ");
+		}
+		System.out.print("}\n");*/
 	}
 
 }

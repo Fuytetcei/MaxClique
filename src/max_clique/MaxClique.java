@@ -8,11 +8,7 @@ import is_clique.IsClique;
 
 public class MaxClique {
 
-	// FALSE = optimista
-	// TRUE  = ajustada
-	public boolean flagEstimacion = false;
-
-	public static Node getMaxClique(GraphMatrix g) {
+	public static Node getMaxClique(GraphMatrix g, boolean flagEstimacion) {
 		int nodosExplorados = 0;
 		Node res = null;
 		PriorityQueue<Node> s = new PriorityQueue<Node>(1024, new NodeComparator());
@@ -23,6 +19,13 @@ public class MaxClique {
 		}
 		Node root = new Node(g, vertices,  -1, kMejor);
 
+		// Selecciono el coste estimado
+		Estimacion estimacion;
+		if(flagEstimacion) {
+			estimacion = new CosteOptimista();
+		} else {
+			estimacion = new CostePesimista();
+		}
 		// Preproceso el grafo
 		int kMax = preprocesaGrafo(g);
 		System.out.println("Como mucho hay un clique de " + kMax + " vertices");
@@ -37,20 +40,19 @@ public class MaxClique {
 		Node next = null;
 		boolean [] v = null;
 		int indice;
-
-		while(!s.isEmpty() && (costeEstimado(s.peek(), kMejor) > kMejor)) {
+		while(!s.isEmpty() && (estimacion.costeEstimado(s.peek(), kMejor) > kMejor)) {
 			nodosExplorados++;
 			curr = s.poll();
 
 			// Miro si soy hoja
 			if((curr.getIndice() + 1) < curr.getG().getSize()) {
-				// Cojo el v√©rtice i
+				// Cojo el vÈrtice i
 				indice = curr.getIndice()+1;
 				v = curr.getVertices().clone();
 				v[indice] = true;
 				next = new Node(g, v, indice, curr.getK() + 1);
 
-				// Miro si llegu√© al tama√±o m√°ximo de clique
+				// Miro si lleguÛ al tamaÒo m·ximo de clique para comprobar si es soluciÛn y terminar
 				if(next.getK() == kMax) {
 					next.setIndice(g.getSize()-1);
 				}
@@ -60,11 +62,11 @@ public class MaxClique {
 						kMejor = res.getK();
 					}
 				} else {
-					if(esCompletable(next, kMejor) && costeEstimado(next, kMejor) > kMejor) {
+					if(esCompletable(next, kMejor) && estimacion.costeEstimado(next, kMejor) > kMejor) {
 						s.add(next);
 					}
 				}
-				// No cojo el v√©rtice i
+				// No cojo el vÈrtice i
 				indice = curr.getIndice() + 1;
 				v = curr.getVertices().clone();
 				next = new Node(g, v, indice, curr.getK());
@@ -74,7 +76,7 @@ public class MaxClique {
 						kMejor = res.getK();
 					}
 				} else {
-					if(esCompletable(next, kMejor) && costeEstimado(next, kMejor) > kMejor) {
+					if(esCompletable(next, kMejor) && estimacion.costeEstimado(next, kMejor) > kMejor) {
 						s.add(next);
 					}
 				}
@@ -84,12 +86,12 @@ public class MaxClique {
 		// Cuento el tiempo total
 		Date finalT = new Date();
 		Date tiempoTotal = new Date(finalT.getTime() - inicioT.getTime());
+		long tiempoMedio = tiempoTotal.getTime() / nodosExplorados;
 
 		System.out.println();
-		System.out.println("TIEMPO TOTAL: " + tiempoTotal.getTime() + " ms");
-		System.out.println("TIEMPO MEDIO POR NODO:  Es el mismo para todos, ya que instacio dos nodos por iteraci√≥n en todas las iteraciones.\n"
-				+ "\t\t\tEn las podas simplemente no los a√±ado a la cola de prioridad.\n");
 		System.out.println("TOTAL NODOS EXPLORADOS: " + nodosExplorados);
+		System.out.println("TIEMPO TOTAL: " + tiempoTotal.getTime() + " ms");
+		System.out.println("TIEMPO MEDIO POR NODO: " + tiempoMedio + " ms");
 
 		return res;
 	}
@@ -98,60 +100,6 @@ public class MaxClique {
 	private static int costeReal(Node next) {
 		// System.out.println("\tCoste real: " + next.getK());
 		return next.getK();
-	}
-
-	// COSTES ESTIMADOS
-	private static int costeEstimado(Node next, int kMax) {
-		// Ing√©nua: todos los v√©rtices restantes forman un clique
-		// System.out.println("\tcoste estimado: " + (next.getK() + (next.getG().getSize() - (next.getIndice() + 1))));
-		return (next.getK() + (next.getG().getSize() - (next.getIndice() + 1)));
-		// Ajustada: Al menos hay un clique de tama√±o (kMax + 1) para los siguientes nodos restantes
-		/*int res;
-		Node estimado = null;
-		int indice = next.getIndice() + (kMax - next.getK());
-		boolean [] v = next.getVertices().clone();
-		
-		v[indice] = true;
-		estimado = new Node(next.getG(), v, indice, kMax + 1);
-
-		for(int i = next.getIndice(); i < estimado.getIndice(); i++) {
-			v[i] = true;
-		}
-
-		if(IsClique.isClique(estimado.getG(), estimado.getVertices())) {
-			res = estimado.getK();
-		} else {
-			res = -1;
-		}
-
-		return res;*/
-	}
-	private static int costeEstimadoOptimista(Node next, int kMax) {
-		// Ing√©nua: todos los v√©rtices restantes forman un clique
-		// System.out.println("\tcoste estimado: " + (next.getK() + (next.getG().getSize() - (next.getIndice() + 1))));
-		return (next.getK() + (next.getG().getSize() - (next.getIndice() + 1)));
-	}
-	private static int costeEstimadoAjustado(Node next, int kMax) {
-		// Ajustada: Al menos hay un clique de tama√±o (kMax + 1) para los siguientes nodos restantes
-		int res;
-		Node estimado = null;
-		int indice = next.getIndice() + (kMax - next.getK());
-		boolean [] v = next.getVertices().clone();
-		
-		v[indice] = true;
-		estimado = new Node(next.getG(), v, indice, kMax + 1);
-
-		for(int i = next.getIndice(); i < estimado.getIndice(); i++) {
-			v[i] = true;
-		}
-
-		if(IsClique.isClique(estimado.getG(), estimado.getVertices())) {
-			res = estimado.getK();
-		} else {
-			res = -1;
-		}
-
-		return res;
 	}
 
 	// ES SOLUCION
@@ -170,7 +118,7 @@ public class MaxClique {
 	private static int preprocesaGrafo(GraphMatrix g) {
 		int aristas = 0;
 
-		// Cuento el n√∫mero de aristas del grafo
+		// Cuento el n˙mero de aristas del grafo
 		for(int i=0; i<g.getSize();i++) {
 			for(int j=0; j<i;j++) {
 				if(g.getLink(i, j)) {
@@ -181,7 +129,7 @@ public class MaxClique {
 
 		System.out.println("Hay " + aristas + " aristas");
 
-		// Calculo el m√°ximo tama√±o posible para un clique en este grafo
+		// Calculo el m·ximo tamaÒo posible para un clique en este grafo
 		boolean fin = true;
 		int res = 1;
 		int curr, next;
@@ -191,7 +139,6 @@ public class MaxClique {
 				curr = next;
 				next = numeroAristas(res + 1);
 
-				System.out.println("curr: " + curr + " next: " + next + " res: " + res);
 				if((curr < aristas) && (aristas <= next)) {
 					fin = false;
 				} else {
@@ -203,13 +150,8 @@ public class MaxClique {
 		return res;
 	}
 
-	// N√∫mero de aristas para un grafo completo de n v√©rtices
+	// N˙mero de aristas para un grafo completo de n vÈrtices
 	private static int numeroAristas(int n) {
 		return (n * (n-1)) / 2;
 	}
 }
-
-/*
- * TODO:
- * 	- Implementar costeEstimado() cota ajustada
- */
